@@ -16,6 +16,8 @@ import { Contact } from './components/Contact';
 import { AdminPanel } from './components/AdminPanel';
 import { ParticleBackground } from './components/ParticleBackground';
 import { Footer } from './components/Footer';
+import profilePic from '../assets/profile.jpg';
+
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
