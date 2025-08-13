@@ -17,6 +17,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { ParticleBackground } from './components/ParticleBackground';
 import { Footer } from './components/Footer';
 import { profilePic } from '../assets/profile.jpg';
+<img src={profilePic} alt="Profile" />
 import { Hero } from './components/Hero';
 
 
