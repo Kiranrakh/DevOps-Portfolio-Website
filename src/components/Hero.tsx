@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import ProfileImg from '../assets/profile.jpg';
+
 import { Download, Github, Linkedin, Mail, ChevronDown, Zap, Shield, Code2 } from 'lucide-react';
 
 interface HeroProps {
