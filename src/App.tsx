@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { Hero } from './components/Hero';
-import { About } from './components/About';
-import { Skills } from './components/Skills';
+import AboutSkills from './components/AboutSkills';
 import { Projects } from './components/Projects';
 import { Challenges } from './components/Challenges';
 import { Education } from './components/Education';
 import { Experience } from './components/Experience';
-import { Learning } from './components/Learning';
 import { Mentors } from './components/Mentors';
 import { VideoIntro } from './components/VideoIntro';
 import { LinkedInPosts } from './components/LinkedInPosts';
@@ -20,6 +18,7 @@ import { ParticleBackground } from './components/ParticleBackground';
 import { Footer } from './components/Footer';
 
 function App() {
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
   const [isHovering, setIsHovering] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
@@ -73,7 +72,7 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-slate-900 text-white relative overflow-x-hidden">
+      <div className={`min-h-screen ${isDarkMode ? 'bg-slate-900 text-white' : 'bg-gray-50 text-gray-900'} relative overflow-x-hidden transition-all duration-500`}>
         {/* Custom Cursor */}
         <div
           className={`cursor ${isHovering ? 'hover' : ''} ${isClicking ? 'click' : ''}`}
@@ -83,7 +82,7 @@ function App() {
           }}
         />
         
-        <ParticleBackground />
+        <ParticleBackground isDarkMode={isDarkMode} />
         
         {/* Cursor Trails */}
         {cursorTrails.map((trail, index) => (
@@ -98,18 +97,16 @@ function App() {
           />
         ))}
         
-        <Navigation />
+        <Navigation isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
         <Routes>
           <Route path="/" element={
             <main className="relative z-10">
-              <Hero />
-              <About />
-              <Skills />
+              <Hero isDarkMode={isDarkMode} />
+              <AboutSkills isDarkMode={isDarkMode} />
               <Projects />
               <Challenges />
               <Education />
               <Experience />
-              <Learning />
               <Mentors />
               <VideoIntro />
               <LinkedInPosts />

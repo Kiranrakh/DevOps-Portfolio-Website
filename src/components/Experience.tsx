@@ -22,7 +22,7 @@ export const Experience: React.FC = () => {
       company: 'LinuxWorld Informatics',
       role: 'DevOps Intern As Learner',
       period: 'Jan 2025 – Present',
-      location: 'Pune, India',
+      location: 'Jaipur, Remote',
       color: 'from-purple-400 to-pink-500',
       description: 'Learning and implementing advanced DevOps technologies and practices.',
       achievements: [
@@ -36,7 +36,7 @@ export const Experience: React.FC = () => {
       company: 'Greateway Software',
       role: 'AWS DevOps Intern',
       period: 'Jul 2024 – Jan 2025',
-      location: 'Remote',
+      location: 'Pune',
       color: 'from-orange-400 to-red-500',
       description: 'Focused on AWS cloud services and DevOps automation.',
       achievements: [

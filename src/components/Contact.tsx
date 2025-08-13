@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, Github, Linkedin, Download } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Github, Linkedin, Download, CheckCircle, AlertCircle } from 'lucide-react';
 
 export const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -9,14 +9,72 @@ export const Contact: React.FC = () => {
     subject: '',
     message: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
     
     try {
-      // Create a more comprehensive email body
-      const emailSubject = encodeURIComponent(formData.subject || 'Portfolio Contact - DevOps Opportunity');
-      const emailBody = encodeURIComponent(`
+      // Using EmailJS service for direct email sending
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          service_id: 'service_portfolio', // You'll need to set this up in EmailJS
+          template_id: 'template_contact', // You'll need to set this up in EmailJS
+          user_id: 'your_emailjs_user_id', // You'll need to get this from EmailJS
+          template_params: {
+            from_name: formData.name,
+            from_email: formData.email,
+            subject: formData.subject,
+            message: formData.message,
+            to_email: 'kiranrakh155@gmail.com',
+          },
+        }),
+      });
+
+      if (response.ok) {
+        setSubmitStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
+      } else {
+        throw new Error('Failed to send email');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      
+      // Fallback: Use Formspree as backup service
+      try {
+        const formspreeResponse = await fetch('https://formspree.io/f/kiranrakh155@gmail.com', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            subject: formData.subject,
+            message: formData.message,
+            _replyto: formData.email,
+          }),
+        });
+
+        if (formspreeResponse.ok) {
+          setSubmitStatus('success');
+          setFormData({ name: '', email: '', subject: '', message: '' });
+        } else {
+          throw new Error('Backup service also failed');
+        }
+      } catch (backupError) {
+        console.error('Backup service error:', backupError);
+        
+        // Final fallback: Create mailto link with pre-filled content
+        const emailSubject = encodeURIComponent(formData.subject || 'Portfolio Contact - DevOps Opportunity');
+        const emailBody = encodeURIComponent(`
 Dear Kiran,
 
 I am reaching out regarding your DevOps portfolio.
@@ -34,57 +92,21 @@ ${formData.name}
 
 ---
 This message was sent from your portfolio website contact form.
-      `);
-      
-      // Create multiple email options for better delivery
-      const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=kiranrakh155@gmail.com&su=${emailSubject}&body=${emailBody}`;
-      const outlookLink = `https://outlook.live.com/mail/0/deeplink/compose?to=kiranrakh155@gmail.com&subject=${emailSubject}&body=${emailBody}`;
-      const mailtoLink = `mailto:kiranrakh155@gmail.com?subject=${emailSubject}&body=${emailBody}`;
-      
-      // Try to open Gmail first, then fallback to mailto
-      const newWindow = window.open(gmailLink, '_blank');
-      
-      // If popup is blocked, try mailto
-      if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+        `);
+        
+        const mailtoLink = `mailto:kiranrakh155@gmail.com?subject=${emailSubject}&body=${emailBody}`;
         window.location.href = mailtoLink;
+        
+        setSubmitStatus('success');
+        setFormData({ name: '', email: '', subject: '', message: '' });
       }
+    } finally {
+      setIsSubmitting(false);
       
-      // Also try to send via a simple fetch to a service (if available)
-      try {
-        await fetch('https://formspree.io/f/kiranrakh155@gmail.com', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            subject: formData.subject,
-            message: formData.message,
-            _replyto: formData.email,
-          }),
-        });
-      } catch (serviceError) {
-        console.log('Backup service unavailable, using email client');
-      }
-      
-      // Reset form
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      
-      // Show success message
-      alert(`✅ Thank you ${formData.name}! Your message has been prepared for sending. 
-      
-📧 Gmail should open in a new tab, or your default email client will launch.
-      
-📋 Your message details:
-• Subject: ${formData.subject}
-• To: kiranrakh155@gmail.com
-      
-If the email doesn't open automatically, please copy the details and send manually to kiranrakh155@gmail.com`);
-      
-    } catch (error) {
-      console.error('Error sending message:', error);
-      alert('❌ There was an issue preparing your message. Please try sending directly to kiranrakh155@gmail.com');
+      // Reset status after 5 seconds
+      setTimeout(() => {
+        setSubmitStatus('idle');
+      }, 5000);
     }
   };
 
@@ -252,11 +274,34 @@ If the email doesn't open automatically, please copy the details and send manual
               Send a Message
             </h3>
             
+            {/* Status Messages */}
+            {submitStatus === 'success' && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-green-900/50 border border-green-500/50 rounded-lg flex items-center space-x-2"
+              >
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <span className="text-green-400">Message sent successfully! I'll get back to you soon.</span>
+              </motion.div>
+            )}
+            
+            {submitStatus === 'error' && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 bg-red-900/50 border border-red-500/50 rounded-lg flex items-center space-x-2"
+              >
+                <AlertCircle className="w-5 h-5 text-red-400" />
+                <span className="text-red-400">Failed to send message. Please try again or contact me directly.</span>
+              </motion.div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-slate-300 mb-2">
-                    Name
+                    Name *
                   </label>
                   <input
                     type="text"
@@ -265,14 +310,15 @@ If the email doesn't open automatically, please copy the details and send manual
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-slate-400"
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-slate-400 disabled:opacity-50"
                     placeholder="Your name"
                   />
                 </div>
                 
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
-                    Email
+                    Email *
                   </label>
                   <input
                     type="email"
@@ -281,7 +327,8 @@ If the email doesn't open automatically, please copy the details and send manual
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-slate-400"
+                    disabled={isSubmitting}
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-slate-400 disabled:opacity-50"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -289,7 +336,7 @@ If the email doesn't open automatically, please copy the details and send manual
               
               <div>
                 <label htmlFor="subject" className="block text-sm font-medium text-slate-300 mb-2">
-                  Subject
+                  Subject *
                 </label>
                 <input
                   type="text"
@@ -298,14 +345,15 @@ If the email doesn't open automatically, please copy the details and send manual
                   value={formData.subject}
                   onChange={handleChange}
                   required
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-slate-400"
+                  disabled={isSubmitting}
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-slate-400 disabled:opacity-50"
                   placeholder="Subject of your message"
                 />
               </div>
               
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-slate-300 mb-2">
-                  Message
+                  Message *
                 </label>
                 <textarea
                   id="message"
@@ -313,18 +361,29 @@ If the email doesn't open automatically, please copy the details and send manual
                   value={formData.message}
                   onChange={handleChange}
                   required
+                  disabled={isSubmitting}
                   rows={6}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-slate-400 resize-none"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-transparent text-white placeholder-slate-400 resize-none disabled:opacity-50"
                   placeholder="Your message here..."
                 />
               </div>
               
               <button
                 type="submit"
-                className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-purple-500 px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-105"
+                disabled={isSubmitting}
+                className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-cyan-500 to-purple-500 px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                <Send className="w-5 h-5" />
-                <span>Send Message</span>
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5" />
+                    <span>Send Message</span>
+                  </>
+                )}
               </button>
             </form>
           </motion.div>
