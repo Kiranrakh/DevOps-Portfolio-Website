@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import ProfileImg from '../assets/profile.jpg';
+import profile from '../assets/profile.jpg';
+
 
 import { Download, Github, Linkedin, Mail, ChevronDown, Zap, Shield, Code2 } from 'lucide-react';
 
@@ -194,7 +196,7 @@ export const Hero: React.FC<HeroProps> = ({ isDarkMode }) => {
                     }}
                   >
                     <img
-                      src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400"
+                      src={profile}
                       alt="Kiran Rakh - DevOps Engineer"
                       className="w-full h-full object-cover object-center transition-all duration-700 hover:brightness-110 hover:contrast-110 hover:saturate-105"
                       style={{ 
