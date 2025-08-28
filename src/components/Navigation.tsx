@@ -53,7 +53,7 @@ export const Navigation: React.FC<NavigationProps> = ({ isDarkMode, setIsDarkMod
               <Code className="w-6 h-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
-              Devops Pro#Kiran Rakh
+              DevOps Engineer
             </span>
           </motion.div>
 
